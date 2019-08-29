@@ -58,7 +58,7 @@ export default class HeaderMovil extends Component{
 	render(){
 		return(
 			<Menu styles = {styles} id='stack'>
-				<Link to='/' className='menu-item'>Home</Link>
+				<Link to='/' className='menu-item'>Inicio</Link>
         {
           localStorage.getItem(Role)?
           <Link to='/alimentos' className='menu-item'>Alimentos</Link> : null
@@ -78,7 +78,7 @@ export default class HeaderMovil extends Component{
         }
         
         {
-          localStorage.getItem('token') ? null :<Link to='/register' className={'menu-item'}>Register</Link>
+          localStorage.getItem('token') ? null :<Link to='/register' className={'menu-item'}>Registro</Link>
         }
 				{
           localStorage.name?

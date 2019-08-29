@@ -2,10 +2,11 @@ import React, {Component} from 'react'
 import Header from './../components/Header/Header'
 import HeaderMovil from './../components/HeaderMovil/HeaderMovil'
 import { Visible, Container, Row, Col } from 'react-grid-system';
-import {Form, Grid, Button, Message, Loader, Dimmer, Modal} from 'semantic-ui-react'
+import {Form, Grid, Button, Message, Loader, Dimmer, Modal, Transition} from 'semantic-ui-react'
 import './styles.css'
 import Headers from './../components/Headers'
 import {RegisterApi} from './../utils/api'
+import { AnimacionForm, TiempoAnimacion} from './../utils/constant'
 import validator from 'validator';
 
 export default class Register extends Component{
@@ -22,7 +23,7 @@ export default class Register extends Component{
 	  	messageNegative:'',
 	  	response:false,
 	  	ok:false,
-
+	  	animacion:false
 	  };
 	}
 
@@ -100,38 +101,45 @@ export default class Register extends Component{
 		this.setState({ok:false})
 	}
 
+	componentDidMount(){
+		this.setState({animacion:true})
+	}
+
 	render(){
 		return(
 			<div>
 				<Headers />
 				
-				<Container className='content'>
+				<Container className='content-register'>
 					<Grid centered columns={2}>
-						<Grid.Column>
-							<Form>
-								<Form.Field>
-						          	<Form.Input fluid label='Email' placeholder='Email' onChange={this.changeEmail} value={this.state.email}/>
-						        </Form.Field>
-						        <Form.Field>
-						          	<Form.Input fluid label='Nombre' placeholder='Nombre' onChange={this.changeNombre} value={this.state.nombre}/>
-						        </Form.Field>
-						        <Form.Field>
-						          	<Form.Input fluid label='Apellido' placeholder='Apellido' onChange={this.changeApellido} value={this.state.apellido}/>
-						        </Form.Field>
-						        <Form.Field>
-						          	<Form.Input fluid label='Password' placeholder='Password' type='password' onChange={this.changePassword} value={this.state.password}/>
-						        </Form.Field>
-						        <Form.Field>
-						          	<Form.Input fluid label='Confirmar Contraseña' placeholder='Confirmar Password' type='password' onChange={this.changePasswordConfirm} value={this.state.passwordConfirm}/>
-						        </Form.Field>
-						        {
-						        	!this.state.response? 
-						        	<Button fluid onClick={this.handleSubmit} style={{marginTop:'50px'}}>Register</Button>
-						        	: 
-						        	null
-						        }
-						       
-							</Form>
+						<Grid.Column> 
+							<Transition visible={this.state.animacion} animation={AnimacionForm} duration={TiempoAnimacion}>
+								<Form>
+									<h1 style={{textAlign: 'center', marginBottom:20}}>Registrate</h1>
+									<Form.Field>
+							          	<Form.Input fluid label='Email' placeholder='Email' onChange={this.changeEmail} value={this.state.email}/>
+							        </Form.Field>
+							        <Form.Field>
+							          	<Form.Input fluid label='Nombre' placeholder='Nombre' onChange={this.changeNombre} value={this.state.nombre}/>
+							        </Form.Field>
+							        <Form.Field>
+							          	<Form.Input fluid label='Apellido' placeholder='Apellido' onChange={this.changeApellido} value={this.state.apellido}/>
+							        </Form.Field>
+							        <Form.Field>
+							          	<Form.Input fluid label='Password' placeholder='Password' type='password' onChange={this.changePassword} value={this.state.password}/>
+							        </Form.Field>
+							        <Form.Field>
+							          	<Form.Input fluid label='Confirmar Contraseña' placeholder='Confirmar Password' type='password' onChange={this.changePasswordConfirm} value={this.state.passwordConfirm}/>
+							        </Form.Field>
+							        {
+							        	!this.state.response? 
+							        	<Button fluid onClick={this.handleSubmit} style={{marginTop:'50px'}}>Register</Button>
+							        	: 
+							        	null
+							        }
+							       
+								</Form>
+							</Transition>
 							{
 								this.state.statusNegative ? 
 								<Message negative>

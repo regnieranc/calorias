@@ -1,4 +1,22 @@
-.content{
-	padding-top: 50px;
+.content-login{
+	margin-top: 170px;
 }
 
+.content-register{
+	margin-top: 100px;
+}
+
+.content{
+	margin-top: 150px;
+}
+
+
+@media (max-width: 600px) {
+	.content-login, .content-register{
+		margin-top: 80px;
+	}
+
+	.content{
+		margin-top: 100px;
+	}
+}

@@ -2,12 +2,12 @@ import React, {Component} from 'react'
 import Header from './../components/Header/Header'
 import HeaderMovil from './../components/HeaderMovil/HeaderMovil'
 import { Visible, Container, Row, Col } from 'react-grid-system';
-import {Form, Grid, Button, Dimmer, Loader, Message, Modal} from 'semantic-ui-react'
+import {Form, Grid, Button, Dimmer, Loader, Message, Modal, Transition} from 'semantic-ui-react'
 import './styles.css'
 import {Redirect} from 'react-router-dom'
 import Headers from './../components/Headers'
 import {LoginApi} from './../utils/api'
-import {Role} from './../utils/constant'
+import {Role, AnimacionForm, TiempoAnimacion} from './../utils/constant'
 import validator from 'validator'
 
 export default class Login extends Component{
@@ -20,14 +20,9 @@ export default class Login extends Component{
 	  	response:false, 
 	  	message:'',
 	  	ok:false, 
-	  	login:false
+	  	login:false,
+	  	animacion:false
 	  };
-	}
-
-	componentWillMount(){
-		if(localStorage.token){
-			this.setState({login:true})
-		}
 	}
 
 	handleSubmit = () => {
@@ -74,27 +69,36 @@ export default class Login extends Component{
 		this.setState({ok:false})
 	}
 
+	componentDidMount(){
+		this.setState({animacion:true})
+	}
+
 	render(){
+		 const { animacion } = this.state
 		return(
 			<div>
 				<Headers />
 				
-				<Container className='content'>
+				<Container className='content-login'>
 					<Grid centered columns={2}>
 						<Grid.Column>
-							<Form>
-								<Form.Field>
-						          	<Form.Input fluid label='Email' placeholder='Email' onChange={this.changeEmail} value={this.state.email}/>
-						        </Form.Field>
-						        <Form.Field>
-						          	<Form.Input fluid label='Password' placeholder='Password' type='password' onChange={this.changePassword} value={this.state.password}/>
-						        </Form.Field>
+
+							<Transition visible={animacion} animation={AnimacionForm} duration={TiempoAnimacion}>
+								<Form>
+									<h1 style={{textAlign: 'center', marginBottom:20}}>Inicia sesión</h1>
+									<Form.Field>
+							          	<Form.Input fluid label='Email' placeholder='Email' onChange={this.changeEmail} value={this.state.email}/>
+							        </Form.Field>
+							        <Form.Field>
+							          	<Form.Input fluid label='Password' placeholder='Password' type='password' onChange={this.changePassword} value={this.state.password}/>
+							        </Form.Field>
 						        {
 						        	!this.state.response?
 						        	<Button fluid style={{marginTop: '50px'}} onClick={this.handleSubmit}>Login</Button> : null
 						        }
 						        
-							</Form>
+								</Form>
+							</Transition>	
 							{
 								this.state.message?
 								<Message negative>
@@ -105,6 +109,7 @@ export default class Login extends Component{
 						</Grid.Column>
 					</Grid>
 				</Container>
+
 				{
 					this.state.response?
 					<Dimmer active><Loader>Loading</Loader></Dimmer> : null
