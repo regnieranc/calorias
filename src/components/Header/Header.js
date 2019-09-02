@@ -3,7 +3,7 @@ import './styles.css'
 import {Link} from 'react-router-dom'
 import {Icon, Popup, Transition} from 'semantic-ui-react'
 import {Hash, Role} from './../../utils/constant'
-import { AnimacionHeader, TiempoAnimacion} from './../../utils/constant'
+import { AnimacionHeader, TiempoAnimacion, Token} from './../../utils/constant'
 
 const style = {
   borderRadius: 5,
@@ -35,7 +35,7 @@ export default class Header extends Component{
 
 					}
 					{
-						localStorage.getItem('token') ?
+						localStorage.getItem(Token) ?
 						<Link to='/' className={'nav-item'}><Popup position='bottom left' inverted header ='Home' trigger={<Icon name='home' className={'icon'} size='large'/>} /></Link> 
 						: <Link to='/' className={'nav-item'}>Inicio</Link>
 					}
@@ -45,7 +45,7 @@ export default class Header extends Component{
 						<Link to='/alimentos' className={'nav-item'}><Popup inverted position='bottom left' header='Alimentos' trigger={<Icon name='food' className={'icon'} size='large' />} /></Link> : null
 					}
 					{
-						localStorage.getItem('token') ? 
+						localStorage.getItem(Token) ? 
 						(
 							<>
 								<Link to='/calorias' className={'nav-item'}><Popup position='bottom left' inverted header='Calorias' trigger={ <Icon name='heartbeat' className={'icon'} size='large'/>} /></Link> 

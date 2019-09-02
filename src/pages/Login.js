@@ -7,8 +7,9 @@ import './styles.css'
 import {Redirect} from 'react-router-dom'
 import Headers from './../components/Headers'
 import {LoginApi} from './../utils/api'
-import {Role, AnimacionForm, TiempoAnimacion} from './../utils/constant'
+import {Role, AnimacionForm, TiempoAnimacion, Token} from './../utils/constant'
 import validator from 'validator'
+import Footer from './../components/Footer'
 
 export default class Login extends Component{
 	constructor(props) {
@@ -37,7 +38,7 @@ export default class Login extends Component{
 				formData.append('password', this.state.password)
 				fetch(LoginApi, {method:'post', body:formData}).then(data => data.json()).then(data =>{
 					if(data.user!=undefined){
-						localStorage.setItem('token', data.access_token)
+						localStorage.setItem(Token, data.access_token)
 						localStorage.setItem('name', data.user.name+' '+data.user.surname)
 						if(data.user.role){
 							localStorage.setItem(Role, data.user.role)
@@ -78,7 +79,10 @@ export default class Login extends Component{
 		return(
 			<div>
 				<Headers />
-				
+				{
+					localStorage.getItem(Token)?
+					<Redirect to ='/' /> : null
+				}
 				<Container className='content-login'>
 					<Grid centered columns={2}>
 						<Grid.Column>
@@ -96,7 +100,7 @@ export default class Login extends Component{
 						        	!this.state.response?
 						        	<Button fluid style={{marginTop: '50px'}} onClick={this.handleSubmit}>Login</Button> : null
 						        }
-						        
+						        <Footer />
 								</Form>
 							</Transition>	
 							{
@@ -108,6 +112,7 @@ export default class Login extends Component{
 							}
 						</Grid.Column>
 					</Grid>
+					
 				</Container>
 
 				{
@@ -118,9 +123,9 @@ export default class Login extends Component{
 				{
 					this.state.ok?
 					<Modal size={'mini'} open={this.state.ok}>
-  						<Modal.Header>Acceso no autorizado!!</Modal.Header>
-							<Modal.Content>
-							<p style={{color:'black'}}>Los datos no estan correctos</p>
+  						<Modal.Header style={{textAlign:'center'}}>Acceso no autorizado!!</Modal.Header>
+							<Modal.Content  style={{marginTop:0, textAlign:'center', color:'black'}}>
+							<p>Los datos no estan correctos</p>
 							</Modal.Content>
 							<Modal.Actions>
 							<Button positive onClick={this.handleClose}>Ok</Button>
@@ -132,6 +137,7 @@ export default class Login extends Component{
 					this.state.login?
 					<Redirect to='/' /> : null
 				}
+				
 			</div>
 		)
 	}

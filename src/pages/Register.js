@@ -6,8 +6,10 @@ import {Form, Grid, Button, Message, Loader, Dimmer, Modal, Transition} from 'se
 import './styles.css'
 import Headers from './../components/Headers'
 import {RegisterApi} from './../utils/api'
-import { AnimacionForm, TiempoAnimacion} from './../utils/constant'
+import { AnimacionForm, TiempoAnimacion, Token} from './../utils/constant'
 import validator from 'validator';
+import Footer from './../components/Footer'
+import {Redirect} from 'react-router-dom'
 
 export default class Register extends Component{
 	constructor(props) {
@@ -109,7 +111,10 @@ export default class Register extends Component{
 		return(
 			<div>
 				<Headers />
-				
+				{
+					localStorage.getItem(Token)?
+					<Redirect to ='/' /> : null
+				}
 				<Container className='content-register'>
 					<Grid centered columns={2}>
 						<Grid.Column> 
@@ -137,7 +142,7 @@ export default class Register extends Component{
 							        	: 
 							        	null
 							        }
-							       
+							       <Footer />
 								</Form>
 							</Transition>
 							{

@@ -6,6 +6,7 @@ import './styles.css'
 import Headers from './../components/Headers'
 import {AnimacionForm, TiempoAnimacion} from './../utils/constant'
 import {Transition} from 'semantic-ui-react'
+import Footer from './../components/Footer'
 
 export default class Index extends Component{
 	constructor(props) {
@@ -40,6 +41,7 @@ export default class Index extends Component{
 						        One of three columns
 						    </Col>
 						</Row>
+						<Footer />
 					</Container>
 				</Transition>
 			</div>

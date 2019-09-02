@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import {slide as Menu} from 'react-burger-menu'
 import {Link} from 'react-router-dom'
 import {Icon} from 'semantic-ui-react'
-import {Role} from './../../utils/constant'
+import {Role, Token} from './../../utils/constant'
 const styles = {
   bmBurgerButton: {
     position: 'fixed',
@@ -64,21 +64,21 @@ export default class HeaderMovil extends Component{
           <Link to='/alimentos' className='menu-item'>Alimentos</Link> : null
         }
         {
-            localStorage.getItem('token') ? 
+            localStorage.getItem(Token) ? 
             <Link to='/calorias' className={'menu-item'}>Calorias</Link> : null
         }
         {
-          localStorage.getItem('token') ? 
+          localStorage.getItem(Token) ? 
           <Link to='/imc' className={'menu-item'}>IMC</Link> : null
         }
         {
-            localStorage.getItem('token') ? 
+            localStorage.getItem(Token) ? 
             <Link to='/logout' className={'menu-item'}>Logout</Link> : 
             <Link to='/login' className={'menu-item '}>Login</Link>
         }
         
         {
-          localStorage.getItem('token') ? null :<Link to='/register' className={'menu-item'}>Registro</Link>
+          localStorage.getItem(Token) ? null :<Link to='/register' className={'menu-item'}>Registro</Link>
         }
 				{
           localStorage.name?

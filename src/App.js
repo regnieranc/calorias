@@ -7,6 +7,7 @@ import Logout from './pages/Logout'
 import Perfil from './pages/Perfil'
 import Alimentos from './pages/Alimentos'
 import Calorias from './pages/Calorias'
+import Page404 from './pages/Page404'
 import Imc from './pages/Imc'
 import './index.css'
 
@@ -22,7 +23,9 @@ class App extends React.Component {
           <Route path='/imc' component={Imc} />
           <Route path='/calorias' component={Calorias} />
           <Route path='/register' component={Register} />
-          <Route path='/' component={Index} />
+          <Route exact path='/' component={Index} />
+          <Route path='*' component={Page404} />
+          
         </Switch>
       </BrowserRouter>
     )

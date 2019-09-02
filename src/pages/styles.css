@@ -10,6 +10,20 @@
 	margin-top: 150px;
 }
 
+.react-calendar{
+	width:100% !important;
+}
+
+.line{
+	background-color:#8b2baa !important;
+}
+.paragraph{
+	//background-color: #a333c8 !important;	
+}
+
+.line:before, .line:after{
+	background-color: #8b2baa !important
+}
 
 @media (max-width: 600px) {
 	.content-login, .content-register{

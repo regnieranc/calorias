@@ -2,7 +2,7 @@ import React from 'react'
 import {LogoutApi} from './../utils/api'
 import {Redirect} from 'react-router-dom'
 import {Dimmer, Loader} from 'semantic-ui-react'
-import {Role} from './../utils/constant'
+import {Role, Token} from './../utils/constant'
 
 export default class Logout extends React.Component{
 	constructor(props) {
@@ -14,7 +14,7 @@ export default class Logout extends React.Component{
 	}
 
 	componentDidMount(){
-		const token = localStorage.getItem('token')
+		const token = localStorage.getItem(Token)
 		if(token){
 			const myHeaders = new Headers();
 			myHeaders.append('Accept', 'application/json');
@@ -24,7 +24,7 @@ export default class Logout extends React.Component{
 				console.log(data)
 				this.setState({logout:true})
 			})
-			localStorage.removeItem('token')
+			localStorage.removeItem(Token)
 			localStorage.removeItem('name')
 			localStorage.removeItem(Role)
 		}else{
