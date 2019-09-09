@@ -9,6 +9,11 @@ import {Transition, Divider, Input, Label, Popup, Button, Table, Placeholder} fr
 import {Row, Col, Container} from 'react-grid-system'
 import Footer from './../components/Footer'
 import validator from 'validator';
+import { MeApi, ShowImc, SaveImc, DeleteImc} from './../utils/api'
+import {MyHeaders, CantidadRegistros} from './../utils/constant'
+import Parrafo from './../components/Parrafo'
+import Tabla from './../components/Tabla'
+import Paginacion from './../components/Paginacion'
 
 const estilos = {
 	width:'100%', textAlign:'center', margin:'2px', fontWeight:'normal', cursor:'pointer', marginTop:'5px'
@@ -24,12 +29,50 @@ export default class Imc extends Component{
 	  	colorImc:'blue',
 	  	imc:0,
 	  	modal:false,
-	  	cargando:false
+	  	cargando:true,
+	  	ID:null,
+	  	responseData:null,
+	  	pagina:1,
+	  	totalPages:null
 	  };
 	}
 
-	componentDidMount(){
+	handleHojear = async ele => {
+		await this.setState({pagina:ele.activePage, cargando:true})
+		await this.getData()
+		this.setState({cargando:false})
+
+		console.log(ele.activePage)
+	}
+
+	async componentDidMount(){
 		this.setState({animacion:true})
+		try{
+			let response = await fetch(MeApi, {method:'post', headers:MyHeaders})
+			let data = await response.json()
+			let id = await data.id
+			await this.setState({ID:id})
+			
+			await this.getData()
+			this.setState({cargando:false})
+		}catch(error){
+			console.log(error)
+		}
+	}
+
+	getData = async () => {
+		try{
+			let body = new FormData()
+			body.append('id', this.state.ID)
+			body.append('cantidadRegistros', CantidadRegistros)
+			body.append('pagina', this.state.pagina)
+			let response = await fetch(ShowImc,{method:'post', headers:MyHeaders, body})
+			let data = await response.json()
+			console.log(data)
+			this.setState({responseData:data.data, totalPages:(data.cantidad.cantidad/CantidadRegistros)})
+		}catch(error){
+			console.log(error)
+		}
 	}
 
 	actualizarDatos = async (e, valor) => {
@@ -67,9 +110,39 @@ export default class Imc extends Component{
 		}
 	}
 	
-	handleImc = () => {
+	handleImc = async () => {
 		//hacer un checkeo rapido y mandar a la api
+		const {altura, peso} =this.state
+		if(this.state.ID && altura && peso){
+			this.setState({cargando:true})
+			let body = new FormData()
+			body.append('altura', altura)
+			body.append('peso', peso)
+			body.append('id', this.state.ID)
+			let response = await fetch(SaveImc, {method:'post', headers:MyHeaders, body})
+			let data = await response.json()
+			console.log(data)
+			
+			await this.getData()
+			this.setState({cargando:false})
+		}else{
+			console.log('no')
+		}
+		console.log(this.state)
 		this.setState({peso:'',altura:'',colorImc:'blue',imc:0})
+	}
+
+	handleEliminar = async ele => {
+		this.setState({cargando:true})
+		try{
+			let body = new FormData()
+			body.append('id', ele.id)
+			await fetch(DeleteImc, {method:'post', headers:MyHeaders, body})
+			await this.getData()
+			this.setState({cargando:false})
+		}catch(error){
+			console.log(error)
+		}
 	}
 
 	render(){
@@ -169,41 +242,28 @@ export default class Imc extends Component{
 							    <Divider hidden /><Divider hidden />
 								{
 									this.state.cargando?
-									<Placeholder fluid style={{borderRadius: '4px'}}>
-    									<Placeholder.Paragraph>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-								            <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-								            <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									    </Placeholder.Paragraph>
-									</Placeholder>
+									<>
+										<Parrafo cantidad={CantidadRegistros*2} />
+										<Divider hidden /><Divider hidden />
+										<Parrafo cantidad={3} />
+									</>
 								    :
-								    <Table color={'purple'} inverted style={{textAlign:'center', cursor:'pointer'}}>
-								    	<Table.Header>
-								    		<Table.Row>
-								    			<Table.HeaderCell>Fecha</Table.HeaderCell>
-									            <Table.HeaderCell>Peso</Table.HeaderCell>
-									            <Table.HeaderCell>Altura</Table.HeaderCell>
-									            <Table.HeaderCell>Imc</Table.HeaderCell>	
-									            <Table.HeaderCell>Accion</Table.HeaderCell>	
-									        </Table.Row>
-									    </Table.Header>
-									    <Table.Body>
-									    	<Table.Row>
-									    		<Table.Cell>dfgdfg</Table.Cell>
-									    		<Table.Cell>dfgdfg</Table.Cell>
-									    		<Table.Cell>dfgdfg</Table.Cell>
-									    		<Table.Cell>dfgdfg</Table.Cell>
-									    		<Table.Cell><Button color='green'>Editar</Button><Button color='red'>Eliminar</Button></Table.Cell>
-									    	</Table.Row>
-									    </Table.Body>
-									</Table>
+								    <>
+									    <Tabla 
+									    	data={this.state.responseData}
+									    	headers={['Fecha', 'Peso', 'Altura', 'Imc']}
+									    	json={['fecha', 'peso', 'altura', 'imc']}
+									    	eliminar={this.handleEliminar}
+									    	botones={true}
+									    	btnEditar={false}
+									    	btnEliminar={true}
+									    	/>
+									    <Paginacion 
+									    	totalPages={this.state.totalPages}
+									    	default={this.state.pagina}
+									    	Hojear={this.handleHojear}
+									    />
+									</>
 								}
 							</Col>
 						</Row>

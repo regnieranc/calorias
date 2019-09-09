@@ -14,3 +14,5 @@ export const MyHeaders = {
 	'Accept': 'application/json',
 	'Authorization': `Bearer ${localStorage.getItem(Token)}`
 }
+
+export const CantidadRegistros = 10

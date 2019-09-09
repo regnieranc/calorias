@@ -25,6 +25,10 @@
 	background-color: #8b2baa !important
 }
 
+.ui.pagination.menu .active.item, .ui.menu .item{
+	color:white !important;
+}
+
 @media (max-width: 600px) {
 	.content-login, .content-register{
 		margin-top: 80px;

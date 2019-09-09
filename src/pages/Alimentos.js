@@ -6,12 +6,13 @@ import {AnimacionForm, TiempoAnimacion} from './../utils/constant'
 import {Transition, Form, Input, Button, Divider, Segment, Checkbox, Placeholder, Table} from 'semantic-ui-react'
 import {Row, Col, Container} from 'react-grid-system'
 import Footer from './../components/Footer'
-import {ShowFood, SaveFood, DeleteFood} from './../utils/api'
-import {MyHeaders} from './../utils/constant'
+import {ShowFood, SaveFood, DeleteFood, EditFood, FindFood} from './../utils/api'
+import {MyHeaders, CantidadRegistros} from './../utils/constant'
 import './styles.css'
 import Parrafo from './../components/Parrafo'
 import Tabla from './../components/Tabla'
 import validator from 'validator';
+import Paginacion from './../components/Paginacion'
 
 export default class Alimentos extends Component{
 	constructor(props) {
@@ -28,7 +29,9 @@ export default class Alimentos extends Component{
 	  	cantidadCaloria:'',
 	  	estadoresponseboton:false,
 	  	alimentoEditar:null,
-	  	editar:false
+	  	editar:false,
+	  	pagina:1,
+	  	totalPages:null
 	  };
 	  
 	}
@@ -37,9 +40,12 @@ export default class Alimentos extends Component{
 		this.setState({toggle:!this.state.toggle})
 	}
 
-	
+	handleHojear = async ele => {
+		await this.setState({pagina:ele.activePage, cargando:true})
+		await this.cargarData()
+	}
 
-	componentDidMount(){
+	 componentDidMount(){
 		this.setState({animacion:true})
 		if(localStorage.getItem(Role)===Hash && localStorage.getItem(Role)!=null){
 			console.log(localStorage.getItem(Role)) 
@@ -47,27 +53,61 @@ export default class Alimentos extends Component{
 		}else{
 			this.setState({response:false})
 		}
-		this.cargarData()
+		 this.cargarData()
 	}
 
 	cargarData = async () => {
+		this.setState({cargando:true})
 		try{
-			const datos = await fetch(ShowFood, {method:'get', headers:MyHeaders})
+			let body = new FormData()
+			body.append('cantidadRegistros', CantidadRegistros)
+			body.append('pagina', this.state.pagina)
+			const datos = await fetch(ShowFood, {method:'post', headers:MyHeaders, body})
 			const json =  await datos.json()
+			console.log(json)
 			if(!json.error)
-				await this.setState({responseAlimentos:json, cargando:false})
+				await this.setState({responseAlimentos:json.data, cargando:false, totalPages:(json.cantidad.cantidad/CantidadRegistros)})
 			
 		}catch(error){
 			console.log(error)
 		}
 	}
 
-	handleEditar = (ele) => {
+	handleEditar = async (ele) => {
+		try{
+			const formData = new FormData()
+			formData.append('id', ele.id)
+			formData.append('calorias', ele.calorias)
+			formData.append('nombre', ele.nombre)
+			let data = await fetch(EditFood, {method:'post', headers:MyHeaders, body:formData})
+			let json =await data.json()
+			console.log(json)
+			
+			await this.cargarData()
+		}catch(error){
+			console.log('error')
+		}
 		//this.setState({elementoEditar:ele, nombreAlimento:ele.nombre, cantidadCaloria:ele.calorias, editar:true})
 	}
 
 	clickEditar = () => {
 
+	}
+
+
+	handleBuscar = async () => {
+		this.setState({cargando:true})
+		try{
+			const formData=new FormData()
+			formData.append('buscar', this.state.nombreAlimento)
+			let res = await fetch(FindFood, {method:'post', headers:MyHeaders, body:formData})
+			res=await res.json()
+			await this.setState({cargando:false, responseAlimentos:res})
+			console.log(res)
+		}catch(e){
+			console.log(e)
+		}
+		console.log(this.state.nombreAlimento)
 	}
 
 	handleEliminar = async (ele) => {
@@ -161,7 +201,7 @@ export default class Alimentos extends Component{
 						        {
 						        	this.state.toggle?
 						        	<Button color='purple' content='Buscar' size='large' fluid disabled/> :
-						        	<Button color='purple' content='Buscar' size='large' fluid />
+						        	<Button color='purple' content='Buscar' size='large' fluid onClick={this.handleBuscar}/>
 						        } <Divider hidden />
 						    </Col>
 						</Row>
@@ -183,16 +223,30 @@ export default class Alimentos extends Component{
 							    <Divider hidden /><Divider hidden />
 								{
 									this.state.cargando?
-									<Parrafo cantidad={15} />
+									<>
+										<Parrafo cantidad={CantidadRegistros*2} />
+										<Divider hidden /><Divider hidden />
+										<Parrafo cantidad={3} />
+									</>
 								    :
-								    <Tabla 
-								    	data={this.state.responseAlimentos}
-								    	headers={['Alimento', 'Caloria', 'Accion']}
-								    	json={['nombre', 'calorias']}
-								    	editar={this.handleEditar}
-								    	eliminar={this.handleEliminar}
-								    	botones={true}
-								    	/>
+								    <>
+									    <Tabla 
+									    	data={this.state.responseAlimentos}
+									    	headers={['Alimento', 'Caloria']}
+									    	json={['nombre', 'calorias']}
+									    	editar={this.handleEditar}
+									    	eliminar={this.handleEliminar}
+									    	botones={true}
+									    	btnEditar={true}
+									    	btnEliminar={true}
+									    	/>
+
+									    <Paginacion 
+									    	totalPages={this.state.totalPages}
+									    	default={this.state.pagina}
+									    	Hojear={this.handleHojear}
+									    />
+									</>
 								}
 							</Col>
 						</Row>

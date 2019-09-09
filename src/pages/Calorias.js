@@ -12,6 +12,11 @@ import moment from 'moment'
 import Footer from './../components/Footer'
 import {Redirect } from 'react-router-dom'
 import validator from 'validator';
+import {DisplayFood, MeApi, SaveCalorias, ShowCalorias, DeleteCalorias, FindCalorias, AdvanceCalorias} from './../utils/api'
+import {MyHeaders, CantidadRegistros} from './../utils/constant'
+import Parrafo from './../components/Parrafo'
+import Tabla from './../components/Tabla'
+import Paginacion from './../components/Paginacion'
 
 const abecedario = [
 	{key:'A', value:'A', text:'A'},
@@ -44,15 +49,15 @@ const abecedario = [
 ]
 
 const cantidadAlimento = [
-	{key:0.25, value:0.25, text:0.25},
-	{key:0.5, value:0.5, text:0.5},
-	{key:0.75, value:0.75, text:0.75},
-	{key:1, value:1, text:1},
-	{key:1.5, value:1.5, text:1.5},
-	{key:2, value:2, text:2},
-	{key:3, value:3, text:3},
-	{key:4, value:4, text:4},
-	{key:5, value:5, text:5},
+	{key:'keya', value:0.25, text:0.25},
+	{key:'keyb', value:0.5, text:0.5},
+	{key:'keyd', value:0.75, text:0.75},
+	{key:'keyr', value:1, text:1},
+	{key:'keyt', value:1.5, text:1.5},
+	{key:'keyy', value:2, text:2},
+	{key:'keyu', value:3, text:3},
+	{key:'keyi', value:4, text:4},
+	{key:'keyo', value:5, text:5},
 ]
 
 export default class Calorias extends Component{
@@ -82,9 +87,187 @@ export default class Calorias extends Component{
 	  	radio:true,
 	  	caloriasInput:'',
 	  	error:false,
-	  	toggleCalorias:true
+	  	toggleCalorias:true,
+	  	responseAlimentos:[{key:-1, value:-1, text:'... seleccione letra ...'}],
+	  	responseCalorias:null,
+	  	alimentoSeleccion:null,
+	  	selectIdAlimento:null,
+	  	caloriasValor:null,
+	  	selectCalorias:1,
+	  	ID:null,
+	  	responseData:null,
+	  	cargando:true,//bandera para mostrar cargando o la tabla
+	  	pagina:1,
+	  	totalPages:null
 	  };
 	}
+
+	handleHojear = async ele => {
+		await this.setState({pagina:ele.activePage, cargando:true})
+		await this.getData()
+		this.setState({cargando:false})
+
+		console.log(ele.activePage)
+	}
+
+	cargarAlimentos = async (e, {value}) => {
+		this.setState({responseAlimentos:[{key:-1, value:-1, text:'... cargando ...'}]})
+		try{
+			let formData = new FormData()
+			formData.append('buscar', value)
+			let response = await fetch(DisplayFood, {method:'post', headers:MyHeaders, body:formData})
+			let data = await response.json()
+			let array = []
+			if(data.length!=0){
+				await data.map(async(ele, index) => {
+					let obj={}
+					 obj.key=await index+'sdf'
+					 obj.value=await ele.id
+					 obj.text=await ele.nombre
+					 array.push(obj)
+				})
+				await this.setState({responseAlimentos:array, responseCalorias:data})
+			}else{
+				this.setState({responseAlimentos:[{key:-1, value:-1, text:'... no hay data ...'}]})
+			}
+			
+			console.log(data)
+		}catch(error){
+			console.log(error)
+		}
+	}
+
+	seleccionarAlimento = (e, {value}) => {
+		console.log(this.state)
+		if(value!=-1){
+			this.state.responseCalorias.map(ele => {
+				if(ele.id==value){
+					this.setState({cantidadCalorias:ele.calorias,selectIdAlimento:ele.id, caloriasValor:ele.calorias})
+				}
+			})
+		}
+	}
+
+	cambiarCalorias =  (e, {value}) => {
+		console.log(value)
+		 this.setState({selectCalorias:value,cantidadCalorias:(this.state.caloriasValor*value).toFixed(1)})
+
+	}
+
+	agregarCalorias = async () => {
+		try{	
+			this.setState({cargando:true})
+			let formData = new FormData()
+			formData.append('user_id', this.state.ID)
+			formData.append('alimento_id', this.state.selectIdAlimento)
+			formData.append('cantidad', this.state.selectCalorias)
+			let response2 = await fetch(SaveCalorias, {method:'post', headers:MyHeaders, body:formData})
+			let data2= await response2.json()
+			this.setState({ cargando:false})
+			this.getData()
+			console.log(data2);
+			//console.log('userid:',id, 'alimentoid:', this.state.selectIdAlimento, 'cantidad', this.state.selectCalorias)
+		}catch(error){
+			console.log(error)
+		}
+	}
+
+	getData = async() => {
+		this.setState({cargando:true})
+		try{
+			const formData = new FormData()
+			formData.append('id', this.state.ID)
+			formData.append('cantidadRegistros', CantidadRegistros)
+			formData.append('pagina', this.state.pagina)
+			let response = await fetch(ShowCalorias, {method:'post', headers:MyHeaders, body:formData})
+			let data = await response.json()
+			console.log(data)
+			this.setState({responseData:data.data, cargando:false, totalPages:(data.cantidad.cantidad/CantidadRegistros)})
+			console.log(data)
+		}catch(error){
+			console.log(error)
+		}
+	}
+
+	async componentDidMount(){
+		this.setState({animacion:true})
+		try{
+			let response = await fetch(MeApi, {method:'post', headers:MyHeaders})
+			let data = await response.json()
+			let id = await data.id
+			console.log(id)
+			await this.setState({ID:id})
+			this.getData()
+		}catch(error){
+			console.log(error)
+		}
+	}
+
+	handleEliminar = async ele => {
+		console.log(ele.id)
+		try{
+			let formData = new FormData()
+			formData.append('id', ele.id)
+			await fetch(DeleteCalorias, {method:'post', headers:MyHeaders, body:formData})
+			await this.getData()
+		}catch(error){
+			console.log(error)
+		}
+	}
+
+	handleBuscar = async () => {
+		if(this.state.selectIdAlimento){
+			this.setState({cargando:true})
+			try{
+				let formData = new FormData()
+				formData.append('id', this.state.selectIdAlimento)
+				formData.append('user_id', this.state.ID)
+				let response = await fetch(FindCalorias, {method:'post', headers:MyHeaders, body:formData})
+				let data = await response.json()
+				await this.setState({responseData:data, cargando:false})
+				this.cargarData()
+			}catch(error){
+				console.log(error)
+			}
+		}else{
+			console.log('error escoge algo')
+		}
+	}
+
+	handleBusquedaAvanzada = async () => {
+		console.log(this.state)
+		let {busqueda} = this.state
+		if(busqueda.desde<=busqueda.hasta){
+			try{
+				this.setState({cargando:true})
+				let formData = new FormData()
+				formData.append('desde', moment(busqueda.desde).format('YYYY-MM-DD'))
+				formData.append('hasta', moment(busqueda.hasta).format('YYYY-MM-DD'))
+				formData.append('alimento', this.state.buscarTexto)
+				formData.append('calorias', this.state.caloriasInput)
+				formData.append('mayormenor', this.state.radio)
+				formData.append('id', this.state.ID)
+				let response = await fetch(AdvanceCalorias, {method:'post', headers:MyHeaders, body:formData})
+				let data = await response.json()
+				this.setState({responseData:data, cargando:false})
+				console.log(this.state.busqueda)
+			}catch(error){
+				console.log(error)
+			}
+		}else {
+			console.log('no')
+		}
+	}
+
+
+
+
+
+
+
+
+
+
 
 	handleToggle = (valor, estado) => {
 		if(estado==1){
@@ -102,7 +285,7 @@ export default class Calorias extends Component{
 
 
 	handleFecha = (date,valor) => {
-		date = moment(date).format('DD/MM/YYYY')
+		date = moment(date).format('MM/DD/YYYY')
 		console.log(date)
 		this.setState({calendario:!this.state.calendario})
 		if(valor==1){
@@ -169,9 +352,9 @@ export default class Calorias extends Component{
 				icon:'user md'
 			}
 			if(this.state.radio){
-				obj.content=`Mayor a ${this.state.caloriasInput}`
+				obj.content=`Mayor a ${this.state.caloriasInput} cal`
 			}else{
-				obj.content=`Menor a ${this.state.caloriasInput}`
+				obj.content=`Menor a ${this.state.caloriasInput} cal`
 			}
 			this.setState(prevState => ({busqueda: { ...prevState.busqueda, cantidad:this.state.caloriasInput}} ))
 			this.setState(prevState => ({busqueda: { ...prevState.busqueda, mayormenor:this.state.radio}} ))
@@ -192,12 +375,11 @@ export default class Calorias extends Component{
 	  		cantidad:'',
 	  		mayormenor:''
 	  	}
+	  	this.getData()
 		this.setState({vector:[], botonFecha:'Fecha Inicio', botonTexto:true, desdehasta:true, disableBoton:true,busqueda, radio:true, caloriasInput:'', buscarTexto:'', toggleCalorias:true })
 	}
 
-	componentDidMount(){
-		this.setState({animacion:true})
-	}
+	
 	render(){
 		const {toggle} = this.state
 		return(
@@ -214,20 +396,20 @@ export default class Calorias extends Component{
 				    	<Transition visible={!this.state.busquedaAvanzada} animation={'fly right'} duration={1000}>
 					    	<div><Row>
 								<Col lg={3}>
-									<Select options={abecedario} fluid size={'large'} placeholder='Selecciona una letra'/><Divider hidden />
+									<Select options={abecedario} fluid size={'large'} placeholder='Selecciona una letra' onChange={this.cargarAlimentos}/><Divider hidden />
 							    </Col>
 							    <Col lg={3}>
-							        <Select options={abecedario} fluid size={'large'} placeholder='Selecciona un Alimento'/><Divider hidden />
+							        <Select options={this.state.responseAlimentos} fluid size={'large'} placeholder='Selecciona un Alimento' onChange={this.seleccionarAlimento}/><Divider hidden />
 							    </Col>
 							    <Col lg={3}>
 							    {
 							    	toggle?
-							        <Select options={cantidadAlimento} fluid placeholder='Cantidad consumida' />:
+							        <Select options={cantidadAlimento} fluid placeholder='Cantidad consumida' onChange={this.cambiarCalorias} value={this.state.selectCalorias} />:
 							        <Select options={cantidadAlimento} fluid placeholder='Cantidad consumida' disabled/>
 							    }<Divider hidden />
 							    </Col>
 							    <Col lg={3}>
-							        <Input size='large'  placeholder='Cantidad Calorias' fluid disabled value={this.state.cantidadCalorias}/><Divider hidden />
+							        <Input size='large'  placeholder='Cantidad Calorias' fluid disabled value={this.state.cantidadCalorias} /><Divider hidden />
 							    </Col>
 							</Row>
 							<Row>
@@ -243,7 +425,7 @@ export default class Calorias extends Component{
 								<Col sm={3}>
 								{
 									toggle?
-									<Button color='green' content='Agregar' size='large' fluid style={{marginTop:5}}/>:
+									<Button color='green' content='Agregar' size='large' fluid style={{marginTop:5}} onClick={this.agregarCalorias}/>:
 									<Button color='green' content='Agregar' size='large' fluid style={{marginTop:5}} disabled/>
 								}
 								</Col>
@@ -251,7 +433,7 @@ export default class Calorias extends Component{
 								{
 									toggle?
 									<Button color='purple' content='Buscar' size='large' fluid style={{marginTop:5}} disabled/>:
-									<Button color='purple' content='Buscar' size='large' fluid style={{marginTop:5}}/>
+									<Button color='purple' content='Buscar' size='large' fluid style={{marginTop:5}} onClick={this.handleBuscar}/>
 								}
 								</Col>
 							</Row></div>
@@ -307,10 +489,12 @@ export default class Calorias extends Component{
 												<Button content='Agregar' color={!this.state.toggleCalorias? 'red' : 'green'} disabled={!this.state.toggleCalorias} onClick={this.handleCalorias} />
 											</Col>
 										</Row>
-										
+
 									</Col> 
 								</Row>
-								
+								<Row>
+									<Col style={{textAlign:'center'}}>Si no establece fechas, por defecto buscara resultados del dia, si establece fecha de inicio DEBE establecer fecha de termino</Col>
+								</Row>
 								<Row style={{textAlign:'center'}}>
 									
 									{
@@ -334,7 +518,7 @@ export default class Calorias extends Component{
 								</Row>
 								<Row style={{textAlign:'center', marginTop:'20px'}}>
 									<Col>
-										<Button content='Buscar' color='green' style={{width:'150px', height:'40px'}}/>
+										<Button content='Buscar' color='green' style={{width:'150px', height:'40px'}} onClick={this.handleBusquedaAvanzada}/>
 									</Col>
 									<Col>
 										<Button content='Limpiar' color='red' style={{width:'150px', height:'40px'}} onClick={this.handleLimpiar}/>
@@ -355,62 +539,53 @@ export default class Calorias extends Component{
 							    <Divider hidden /><Divider hidden /><Divider hidden />
 								{
 									this.state.cargando?
-									<Placeholder fluid style={{borderRadius: '4px'}}>
-    									<Placeholder.Paragraph>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-								            <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-								            <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									        <Placeholder.Line  style={{backgroundColor: '#d2d2d2'}}/>
-									    </Placeholder.Paragraph>
-									</Placeholder>
+									<>
+										<Parrafo cantidad={CantidadRegistros*2} />
+										<Divider hidden /><Divider hidden />
+										<Parrafo cantidad={3} />
+									</>
 								    :
-								    <Table color={'purple'} inverted style={{textAlign:'center', cursor:'pointer'}}>
-								    	<Table.Header>
-								    		<Table.Row>
-								    			<Table.HeaderCell>Fecha</Table.HeaderCell>
-								    			<Table.HeaderCell>Cantidad</Table.HeaderCell>
-									            <Table.HeaderCell>Alimento</Table.HeaderCell>
-									            <Table.HeaderCell>Calorias</Table.HeaderCell>	
-									            <Table.HeaderCell>Accion</Table.HeaderCell>
-									        </Table.Row>
-									    </Table.Header>
-									    <Table.Body>
-									    	<Table.Row>
-									    		<Table.Cell>dfgdfg</Table.Cell>
-									    		<Table.Cell>dfgdfg</Table.Cell>
-									    		<Table.Cell>dfgdfg</Table.Cell>
-									    		<Table.Cell>dfgdfg</Table.Cell>
-									    		<Table.Cell><Button color='green'>Editar</Button><Button color='red'>Eliminar</Button></Table.Cell>
-									    	</Table.Row>
-									    </Table.Body>
-									</Table>
+								    <>
+									    <Tabla 
+									    	data={this.state.responseData}
+									    	headers={['Fecha', 'Cantidad', 'Alimento', 'Calorias']}
+									    	json={['fecha', 'cant', 'nombre', 'cantidad']}
+									    	eliminar={this.handleEliminar}
+									    	botones={true}
+									    	btnEditar={false}
+									    	btnEliminar={true}
+									    	/>
+									    <Paginacion 
+									    	totalPages={this.state.totalPages}
+									    	default={this.state.pagina}
+									    	Hojear={this.handleHojear}
+									    />
+							    	</>
+
+								   
 								}
 							</Col>
 						</Row>
 
 						{
 							this.state.error?
-							<Modal size={'mini'} open={this.state.error} onClose={() => {this.setState({error:false})}}>
-					            <Modal.Header style={{textAlign:'center'}}>Error en la validacion</Modal.Header>
-					            <Modal.Content style={{marginTop:0, textAlign:'center', color:'black'}}>
-					                <p>El valor ingresado no es valido</p>
-					            </Modal.Content>
-					            <Modal.Actions>
-					            	<Button
-					                    positive
-					                    icon='checkmark'
-					                    labelPosition='right'
-					                    content='Ok'
-					                    onClick = {() => {this.setState({error:false})}}
-					                />
-					            </Modal.Actions>
-					        </Modal> : null
+								<Modal size={'mini'} open={this.state.error} onClose={() => {this.setState({error:false})}}>
+						            <Modal.Header style={{textAlign:'center'}}>Error en la validacion</Modal.Header>
+						            <Modal.Content style={{marginTop:0, textAlign:'center', color:'black'}}>
+						                <p>El valor ingresado no es valido</p>
+						            </Modal.Content>
+						            <Modal.Actions>
+						            	<Button
+						                    positive
+						                    icon='checkmark'
+						                    labelPosition='right'
+						                    content='Ok'
+						                    onClick = {() => {this.setState({error:false})}}
+						                />
+						            </Modal.Actions>
+						        </Modal> 
+					        : null
+					        
 						}
 						<Footer />
 					</Container>

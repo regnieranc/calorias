@@ -32,13 +32,13 @@ export default class Index extends Component{
 					<Container className='content'>
 						<Row>
 							<Col sm={4} debug>
-								One of three columns
+								asdsd
 						    </Col>
 						    <Col sm={4} debug>
-						        One of three columns
+						        asdsd
 						    </Col>
 						    <Col sm={4} debug>
-						        One of three columns
+						        asdsd
 						    </Col>
 						</Row>
 						<Footer />

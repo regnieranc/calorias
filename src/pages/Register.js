@@ -163,7 +163,7 @@ export default class Register extends Component{
 					this.state.ok?
 					<Modal size={'mini'} open={this.state.ok}>
   						<Modal.Header>Ya puedes usar la app!!</Modal.Header>
-							<Modal.Content>
+							<Modal.Content  style={{marginTop:0, textAlign:'center', color:'black'}}>
 							<p style={{color:'black'}}>Gracias por registrarte, revisa tu bandeja de correo para confirmar el registro</p>
 							</Modal.Content>
 							<Modal.Actions>
