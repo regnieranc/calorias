@@ -88,7 +88,7 @@ export default class Login extends Component{
 				}
 				<Transition visible={animacion} animation={AnimacionForm} duration={TiempoAnimacion}>
 				<Container className='content-login'>
-					<Grid centered columns={2} only='mobile'>
+					<Grid centered columns={2}>
 						<Grid.Column>
 
 							
