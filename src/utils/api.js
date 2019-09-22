@@ -49,3 +49,5 @@ export const DeleteImc = dominio+'/api/imc/delete'
 //PERFIL
 
 export const MisCalorias = dominio+'/api/perfil/miscaloriasdiarias'
+
+export const UltimasCalorias = dominio+'/api/perfil/ultimascalorias'

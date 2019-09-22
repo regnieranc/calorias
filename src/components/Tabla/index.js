@@ -33,7 +33,7 @@ export default class index extends React.Component{
 	render(){
 		return(
 			<React.Fragment>
-				<Table color={'purple'} inverted style={{textAlign:'center', cursor:'pointer'}}>
+				<Table color={'purple'} inverted style={{textAlign:'center', cursor:'pointer'}} selectable >
 			    	<Table.Header>
 			    		<Table.Row>
 			    			{
@@ -43,7 +43,10 @@ export default class index extends React.Component{
 			    					)
 			    				})
 			    			}
-			    				<Table.HeaderCell key={'Accion'}>{'Accion'}</Table.HeaderCell>
+			    				{
+			    					this.props.botones?
+			    					<Table.HeaderCell key={'Accion'}>{'Accion'}</Table.HeaderCell>:null
+			    				}
 			    			
 				        </Table.Row>
 				    </Table.Header>
@@ -88,7 +91,7 @@ export default class index extends React.Component{
 							<Button negative onClick={this.handleNo}>No</Button>
 						</Modal.Actions></Modal> :
 
-						<Modal size={'fullscreen'} open={this.state.confirmar}><Modal.Header style={{textAlign:'center'}}>Editar!!</Modal.Header>
+						<Modal size={'huge'} open={this.state.confirmar}><Modal.Header style={{textAlign:'center'}}>Editar!!</Modal.Header>
 							<Modal.Content  style={{marginTop:0, textAlign:'center', color:'black'}}>
 								<Table color={'purple'} style={{textAlign:'center', cursor:'pointer'}}>
 									<Table.Header>

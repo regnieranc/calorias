@@ -5,13 +5,16 @@ import {AnimacionForm, TiempoAnimacion, Token} from './../utils/constant'
 import {Transition, Header, Card, Divider} from 'semantic-ui-react'
 import {Row, Col, Container} from 'react-grid-system'
 import Footer from './../components/Footer'
-import {MisCalorias, MeApi} from './../utils/api'
+import {MisCalorias, MeApi, UltimasCalorias} from './../utils/api'
 import {MyHeaders} from './../utils/constant'
 import moment from 'moment'
 import CountUp from 'react-countup';
 import './styles.css'
-import Pie from './../components/charts/Pie'
+import Tabla from './../components/Tabla'
 import Parrafo from './../components/Parrafo'
+import PieChart from './../components/charts/Pie'
+import LineChart from './../components/charts/Line'
+import Top from './../components/Top'
 
 export default class Perfil extends Component{
 	constructor(props) {
@@ -25,13 +28,17 @@ export default class Perfil extends Component{
 	  	ultimo:{
 	  		fecha:'..  ..',
 	  		nombre:'..  ..',
-	  		calorias:0
+	  		calorias:0,
+	  		cantidad:0
 	  	},
 	  	cargando:true,
 	  	chartpie:{
 	  		labels:[],
 	  		data:[]
-	  	}
+	  	},
+	  	responseCalorias:null,
+	  	responsePeso:null,
+	  	responseLineChart:null
 	  };
 	}
 
@@ -47,16 +54,24 @@ export default class Perfil extends Component{
 			body.append('id', this.state.ID)
 			let response2 = await fetch(MisCalorias, {method:'post', headers:MyHeaders, body})
 			let data2 = await response2.json()
-			console.log(data2[3])
+			console.log(data2[2])
 			let ultimo=data2[2]
 			let chartpie={}
 			chartpie.labels=[]
 			chartpie.data=[]
-			data2[3].map(ele => {
+			await data2[3].map(ele => {
 				chartpie.labels.push(ele.cantidad+" "+ele.nombre)
-				chartpie.data.push(ele.total)
+				chartpie.data.push([ele.cantidad+" "+ele.nombre, ele.total])
 			})
-			await this.setState({totalCalorias:data2[0].total, imc:data2[1].imc, ultimo, cargando:false, chartpie})
+			let response3=await fetch(UltimasCalorias, {method:'post', headers:MyHeaders, body})
+			let json = await response3.json()
+			console.log(data2)
+			let aux=[]
+			json.historial.map(ele => {
+				console.log(ele)
+				aux.push([ele.fecha, ele.calorias])
+			})
+			await this.setState({totalCalorias:data2[0].total, imc:data2[1].imc, ultimo, cargando:false, chartpie, responseCalorias:json.ultimascalorias,responsePeso:json.peso, responseLineChart:aux})
 		}catch(error){
 			console.log(error)
 		}
@@ -64,7 +79,8 @@ export default class Perfil extends Component{
 
 	render(){
 		return (
-			<>
+			<>	
+				<Top />
 				<Headers />
 				{
 					localStorage.getItem(Token)?
@@ -83,7 +99,7 @@ export default class Perfil extends Component{
 						    		</Card.Header>
 								    <Card.Content style={{height:'60px', marginBottom:'10px'}}>
 								    	<Header size='medium' style={{color:'white'}}>
-								    		{this.state.ultimo.nombre} :    
+								    		{this.state.ultimo.cantidad+" "+this.state.ultimo.nombre} :    
 								    		<CountUp 
 												end={this.state.ultimo.calorias}	
 											 /> cal.
@@ -131,7 +147,7 @@ export default class Perfil extends Component{
 								        			   this.state.totalCalorias<1500? 'yellow':
 								        			   this.state.totalCalorias<1800? 'orange':'red'}>
 											<CountUp 
-												end={this.state.totalCalorias}
+												end={this.state.totalCalorias?this.state.totalCalorias:0}
 												decimals={1}	
 											 /> cal
 										</Header>
@@ -144,17 +160,48 @@ export default class Perfil extends Component{
 						</Row><Divider hidden />
 						<Row>
 							<Col lg={6}>
-							{/*
-								this.state.cargando?
-								<Parrafo cantidad={16} /> :
-								<Pie 
-									data={this.state.chartpie}
-								/>*/
+							{
+								this.state.responseCalorias?
+								<Tabla
+										data={this.state.responseCalorias}
+										json={['fecha', 'calorias']}
+										headers={['Fecha', 'Calorias']} 
+										botones={false}
+									/>	:
+								<Parrafo cantidad={12} /> 
 							}
-								
+								<Divider hidden />					
+
+							{
+								this.state.responsePeso?
+								<Tabla
+										data={this.state.responsePeso}
+										json={['fecha', 'peso', 'imc']}
+										headers={['Fecha', 'Peso', 'Imc']} 
+										botones={false}
+									/>	:
+								<Parrafo cantidad={12} />
+							}<Divider hidden />
 							</Col>
-							<Col lg={6} debug>
-							sdf
+
+							<Col lg={6}>
+								{
+									this.state.cargando?
+									<Parrafo cantidad={12} /> :
+									<PieChart
+										data={this.state.chartpie}
+										title='Aporte calorico alimentos consumidos en el dia'
+									/>
+								}
+
+								{
+									this.state.cargando?
+									<Parrafo cantidad={12} /> :
+									<LineChart
+										data={this.state.responseLineChart}
+										title='Consumo total de calorias por dia'
+									/>
+								}
 							</Col>
 						</Row>
 						<Footer />

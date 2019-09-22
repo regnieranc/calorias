@@ -14,6 +14,7 @@ import {MyHeaders, CantidadRegistros} from './../utils/constant'
 import Parrafo from './../components/Parrafo'
 import Tabla from './../components/Tabla'
 import Paginacion from './../components/Paginacion'
+import Top from './../components/Top'
 
 const estilos = {
 	width:'100%', textAlign:'center', margin:'2px', fontWeight:'normal', cursor:'pointer', marginTop:'5px'
@@ -69,7 +70,7 @@ export default class Imc extends Component{
 			let response = await fetch(ShowImc,{method:'post', headers:MyHeaders, body})
 			let data = await response.json()
 			console.log(data)
-			this.setState({responseData:data.data, totalPages:(data.cantidad.cantidad/CantidadRegistros)})
+			this.setState({responseData:data.data, totalPages:Math.ceil(data.cantidad.cantidad/CantidadRegistros)})
 		}catch(error){
 			console.log(error)
 		}
@@ -148,6 +149,7 @@ export default class Imc extends Component{
 	render(){
 		return(
 			<div>
+			<Top />	
 			{
 				localStorage.getItem(Token)?
 					   null  :<Redirect to='/' />

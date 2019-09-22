@@ -10,6 +10,7 @@ import { AnimacionForm, TiempoAnimacion, Token} from './../utils/constant'
 import validator from 'validator';
 import Footer from './../components/Footer'
 import {Redirect} from 'react-router-dom'
+import Top from './../components/Top'
 
 export default class Register extends Component{
 	constructor(props) {
@@ -110,15 +111,17 @@ export default class Register extends Component{
 	render(){
 		return(
 			<div>
+			<Top />
 				<Headers />
 				{
 					localStorage.getItem(Token)?
 					<Redirect to ='/' /> : null
 				}
+				<Transition visible={this.state.animacion} animation={AnimacionForm} duration={TiempoAnimacion}>
 				<Container className='content-register'>
 					<Grid centered columns={2}>
 						<Grid.Column> 
-							<Transition visible={this.state.animacion} animation={AnimacionForm} duration={TiempoAnimacion}>
+							
 								<Form>
 									<h1 style={{textAlign: 'center', marginBottom:20}}>Registrate</h1>
 									<Form.Field>
@@ -142,9 +145,8 @@ export default class Register extends Component{
 							        	: 
 							        	null
 							        }
-							       <Footer />
 								</Form>
-							</Transition>
+							
 							{
 								this.state.statusNegative ? 
 								<Message negative>
@@ -154,7 +156,8 @@ export default class Register extends Component{
 							}
 						</Grid.Column>
 					</Grid>
-				</Container>
+					<Footer />
+				</Container></Transition>
 				{
 					this.state.response?
 					<Dimmer active><Loader size='large'>Loading</Loader></Dimmer> : null

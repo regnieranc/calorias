@@ -17,6 +17,7 @@ import {MyHeaders, CantidadRegistros} from './../utils/constant'
 import Parrafo from './../components/Parrafo'
 import Tabla from './../components/Tabla'
 import Paginacion from './../components/Paginacion'
+import Top from './../components/Top'
 
 const abecedario = [
 	{key:'A', value:'A', text:'A'},
@@ -49,15 +50,23 @@ const abecedario = [
 ]
 
 const cantidadAlimento = [
+	{key:'keya11', value:0.1, text:0.1},
 	{key:'keya', value:0.25, text:0.25},
 	{key:'keyb', value:0.5, text:0.5},
 	{key:'keyd', value:0.75, text:0.75},
 	{key:'keyr', value:1, text:1},
+	{key:'keyr25', value:1.25, text:1.25},
 	{key:'keyt', value:1.5, text:1.5},
+	{key:'keyr75', value:1.75, text:1.75},
 	{key:'keyy', value:2, text:2},
 	{key:'keyu', value:3, text:3},
 	{key:'keyi', value:4, text:4},
-	{key:'keyo', value:5, text:5},
+	{key:'keyo5', value:5, text:5},
+	{key:'keyo6', value:6, text:6},
+	{key:'key7o', value:7, text:7},
+	{key:'keyo8', value:8, text:8},
+	{key:'keyo9', value:9, text:9},
+	{key:'key10', value:10, text:10},
 ]
 
 export default class Calorias extends Component{
@@ -104,7 +113,12 @@ export default class Calorias extends Component{
 
 	handleHojear = async ele => {
 		await this.setState({pagina:ele.activePage, cargando:true})
-		await this.getData()
+		console.log(this.state.busquedaAvanzada)
+		if(!this.state.busquedaAvanzada){
+			await this.getData()
+		}else{
+			await this.handleBusquedaAvanzada()
+		}
 		this.setState({cargando:false})
 
 		console.log(ele.activePage)
@@ -165,7 +179,6 @@ export default class Calorias extends Component{
 			let data2= await response2.json()
 			this.setState({ cargando:false})
 			this.getData()
-			console.log(data2);
 			//console.log('userid:',id, 'alimentoid:', this.state.selectIdAlimento, 'cantidad', this.state.selectCalorias)
 		}catch(error){
 			console.log(error)
@@ -181,9 +194,7 @@ export default class Calorias extends Component{
 			formData.append('pagina', this.state.pagina)
 			let response = await fetch(ShowCalorias, {method:'post', headers:MyHeaders, body:formData})
 			let data = await response.json()
-			console.log(data)
-			this.setState({responseData:data.data, cargando:false, totalPages:(data.cantidad.cantidad/CantidadRegistros)})
-			console.log(data)
+			this.setState({responseData:data.data, cargando:false, totalPages:Math.ceil(data.cantidad.cantidad/CantidadRegistros)})
 		}catch(error){
 			console.log(error)
 		}
@@ -225,7 +236,6 @@ export default class Calorias extends Component{
 				let response = await fetch(FindCalorias, {method:'post', headers:MyHeaders, body:formData})
 				let data = await response.json()
 				await this.setState({responseData:data, cargando:false})
-				this.cargarData()
 			}catch(error){
 				console.log(error)
 			}
@@ -247,9 +257,11 @@ export default class Calorias extends Component{
 				formData.append('calorias', this.state.caloriasInput)
 				formData.append('mayormenor', this.state.radio)
 				formData.append('id', this.state.ID)
+				formData.append('cantidadRegistros', CantidadRegistros)
+				formData.append('pagina', this.state.pagina)
 				let response = await fetch(AdvanceCalorias, {method:'post', headers:MyHeaders, body:formData})
 				let data = await response.json()
-				this.setState({responseData:data, cargando:false})
+				this.setState({responseData:data.data, cargando:false, totalPages:(data.cantidad.cantidad/CantidadRegistros)})
 				console.log(this.state.busqueda)
 			}catch(error){
 				console.log(error)
@@ -384,6 +396,7 @@ export default class Calorias extends Component{
 		const {toggle} = this.state
 		return(
 			<div>
+				<Top />
 				<Headers />
 				{
 					(localStorage.getItem(Token))?

@@ -19,9 +19,39 @@ a:visited{
 	color: white;
 }
 
+a:hover{
+	color: white !important;
+}
 label{
 	color: white !important;
 	font-size: 18px !important;
 	font-weight: normal !important; 
+}
+
+
+
+
+
+/*custom scrol bar*/
+/* width */
+::-webkit-scrollbar {
+  width: 16px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: white;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #777;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #444;
+  cursor: pointer !important;
 }
 

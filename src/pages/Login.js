@@ -7,9 +7,10 @@ import './styles.css'
 import {Redirect} from 'react-router-dom'
 import Headers from './../components/Headers'
 import {LoginApi} from './../utils/api'
-import {Role, AnimacionForm, TiempoAnimacion, Token} from './../utils/constant'
+import {Role, AnimacionForm, TiempoAnimacion, Token, MyHeaders} from './../utils/constant'
 import validator from 'validator'
 import Footer from './../components/Footer'
+import Top from './../components/Top'
 
 export default class Login extends Component{
 	constructor(props) {
@@ -26,7 +27,7 @@ export default class Login extends Component{
 	  };
 	}
 
-	handleSubmit = () => {
+	handleSubmit =  () => {
 		this.setState({response:true})
 		console.log('hacer consulta y apagar loader y hacer lo necesario redireccionando');
 		if(this.state.email && this.state.password){
@@ -40,6 +41,7 @@ export default class Login extends Component{
 					if(data.user!=undefined){
 						localStorage.setItem(Token, data.access_token)
 						localStorage.setItem('name', data.user.name+' '+data.user.surname)
+						MyHeaders['Authorization']=`Bearer ${localStorage.getItem(Token)}`
 						if(data.user.role){
 							localStorage.setItem(Role, data.user.role)
 						}
@@ -78,16 +80,18 @@ export default class Login extends Component{
 		 const { animacion } = this.state
 		return(
 			<div>
+			<Top />
 				<Headers />
 				{
 					localStorage.getItem(Token)?
 					<Redirect to ='/' /> : null
 				}
+				<Transition visible={animacion} animation={AnimacionForm} duration={TiempoAnimacion}>
 				<Container className='content-login'>
-					<Grid centered columns={2}>
+					<Grid centered columns={2} only='mobile'>
 						<Grid.Column>
 
-							<Transition visible={animacion} animation={AnimacionForm} duration={TiempoAnimacion}>
+							
 								<Form>
 									<h1 style={{textAlign: 'center', marginBottom:20}}>Inicia sesión</h1>
 									<Form.Field>
@@ -100,9 +104,9 @@ export default class Login extends Component{
 						        	!this.state.response?
 						        	<Button fluid style={{marginTop: '50px'}} onClick={this.handleSubmit}>Login</Button> : null
 						        }
-						        <Footer />
+						        
 								</Form>
-							</Transition>	
+								
 							{
 								this.state.message?
 								<Message negative>
@@ -112,8 +116,8 @@ export default class Login extends Component{
 							}
 						</Grid.Column>
 					</Grid>
-					
-				</Container>
+					<Footer />
+				</Container></Transition>
 
 				{
 					this.state.response?

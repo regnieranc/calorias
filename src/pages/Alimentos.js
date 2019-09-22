@@ -13,6 +13,7 @@ import Parrafo from './../components/Parrafo'
 import Tabla from './../components/Tabla'
 import validator from 'validator';
 import Paginacion from './../components/Paginacion'
+import Top from './../components/Top'
 
 export default class Alimentos extends Component{
 	constructor(props) {
@@ -65,9 +66,9 @@ export default class Alimentos extends Component{
 			const datos = await fetch(ShowFood, {method:'post', headers:MyHeaders, body})
 			const json =  await datos.json()
 			console.log(json)
-			if(!json.error)
-				await this.setState({responseAlimentos:json.data, cargando:false, totalPages:(json.cantidad.cantidad/CantidadRegistros)})
-			
+			if(!json.error){
+				await this.setState({responseAlimentos:json.data, cargando:false, totalPages:Math.ceil(json.cantidad.cantidad/CantidadRegistros)})
+			}
 		}catch(error){
 			console.log(error)
 		}
@@ -167,6 +168,7 @@ export default class Alimentos extends Component{
 
 		return(
 			<>
+				<Top />
 				<Headers />
 				{
 					accion	
